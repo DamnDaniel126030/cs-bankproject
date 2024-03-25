@@ -1,4 +1,5 @@
-﻿using System;
+﻿global using System.IO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
