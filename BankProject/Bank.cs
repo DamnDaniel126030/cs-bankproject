@@ -74,7 +74,8 @@ namespace BankProject
         /// <exception cref="HibasSzamlaszamException">A megadott számlaszámmal nem létezik számla</exception>
         public ulong Egyenleg(string szamlaszam)
         {
-            return 0;
+            Szamla szamla = SzamlaKereses(szamlaszam);
+			return szamla.Egyenleg;
         }
 
         /// <summary>
@@ -88,8 +89,13 @@ namespace BankProject
         /// <exception cref="HibasSzamlaszamException">A megadott számlaszámmal nem létezik számla</exception>
         public void EgyenlegFeltolt(string szamlaszam, ulong osszeg)
         {
-            throw new NotImplementedException();
-        }
+            if (osszeg <= 0)
+            {
+                throw new ArgumentException("Az összeg csak pozitív lehet.", nameof(osszeg));
+            }
+            Szamla szamla = SzamlaKereses(szamlaszam);
+            szamla.Egyenleg += osszeg;
+		}
 
         /// <summary>
         /// Két számla között utal.
@@ -107,5 +113,29 @@ namespace BankProject
         {
             throw new NotImplementedException();
         }
+
+        private Szamla SzamlaKereses(string szamlaszam)
+        {
+			if (szamlaszam == null)
+			{
+				throw new ArgumentNullException(nameof(szamlaszam));
+			}
+			if (szamlaszam == "")
+			{
+				throw new ArgumentException("A számlaszám nem lehet üres", nameof(szamlaszam));
+			}
+
+			int idx = 0;
+			while (idx < szamlak.Count && szamlak[idx].Szamlaszam != szamlaszam)
+			{
+				idx++;
+			}
+			if (idx == szamlak.Count)
+			{
+				throw new HibasSzamlaszamException(szamlaszam);
+			}
+
+            return this.szamlak[idx];
+		}
     }
 }

@@ -59,5 +59,75 @@ namespace UnitTestProject
 		{
 			Assert.DoesNotThrow(() => b.UjSzamla("Gipsz Jakab", "5678"));
 		}
+
+		[Test]
+		public void Egyenleg_NullSzamlaszam()
+		{
+			Assert.Throws<ArgumentNullException>(() => b.Egyenleg(null));
+		}
+
+		[Test]
+		public void Egyenleg_UresSzamlaszam()
+		{
+			Assert.Throws<ArgumentException>(() => b.Egyenleg(""));
+		}
+
+		[Test]
+		public void Egyenleg_NemLetezoSzamlaszam()
+		{
+			Assert.Throws<HibasSzamlaszamException>(() => b.Egyenleg("4321"));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_NullSzamlaszam()
+		{
+			Assert.Throws<ArgumentNullException>(() => b.EgyenlegFeltolt(null, 10000));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_UreSzamlaszam()
+		{
+			Assert.Throws<ArgumentException>(() => b.EgyenlegFeltolt("", 10000));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_NemLetezoSzamlaszam()
+		{
+			Assert.Throws<HibasSzamlaszamException>(() => b.EgyenlegFeltolt("4321", 10000));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_0OsszegSzamlaszam()
+		{
+			Assert.Throws<ArgumentException>(() => b.EgyenlegFeltolt("1234", 0));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_OsszegMegvaltozik()
+		{
+			b.EgyenlegFeltolt("1234", 10000);
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(10000));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_OsszegHozzaadodik()
+		{
+			b.EgyenlegFeltolt("1234", 10000);
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(10000));
+			b.EgyenlegFeltolt("1234", 20000);
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(30000));
+		}
+
+		[Test]
+		public void EgyenlegFeltolt_JoSzamlaraKerulAzOsszeg()
+		{
+			b.UjSzamla("Teszt Elek", "4321");
+			b.UjSzamla("Gipsz Jakab", "5678");
+			b.EgyenlegFeltolt("1234", 10000);
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(10000));
+			b.EgyenlegFeltolt("4321", 20000);
+			Assert.That(b.Egyenleg("4321"), Is.EqualTo(20000));
+			Assert.That(b.Egyenleg("5678"), Is.Zero);
+		}
 	}
 }
