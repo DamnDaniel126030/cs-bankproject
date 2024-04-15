@@ -129,5 +129,104 @@ namespace UnitTestProject
 			Assert.That(b.Egyenleg("4321"), Is.EqualTo(20000));
 			Assert.That(b.Egyenleg("5678"), Is.Zero);
 		}
+
+		public void Utal_Setup()
+		{
+			b.EgyenlegFeltolt("1234", 50000);
+			b.UjSzamla("Teszt Elek", "5678");
+			b.EgyenlegFeltolt("5678", 20000);
+		}
+		[Test]
+		public void Utal_NullSzamlaszamHonnan()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentNullException>(() => b.Utal(null, "5678", 10000));
+		}
+
+		[Test]
+		public void Utal_NullSzamlaszamHova()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentNullException>(() => b.Utal("1234", null, 10000));
+		}
+
+		[Test]
+		public void Utal_NemLetezoSzamlaszamHonnan()
+		{
+			Utal_Setup();
+			Assert.Throws<HibasSzamlaszamException>(() => b.Utal("7891", "5678", 10000));
+		}
+
+		[Test]
+		public void Utal_NemLetezoSzamlaszamHova()
+		{
+			Utal_Setup();
+			Assert.Throws<HibasSzamlaszamException>(() => b.Utal("1234", "7865", 10000));
+		}
+
+		[Test]
+		public void Utal_UresSzamlaszamHonnan()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentException>(() => b.Utal("", "5678", 10000));
+		}
+
+		[Test]
+		public void Utal_UresSzamlaszamHova()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentException>(() => b.Utal("1234", "", 10000));
+		}
+
+		[Test]
+		public void Utal_0OsszegUtalas()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentException>(() => b.Utal("1234", "5678", 0));
+		}
+
+		[Test]
+		public void Utal_OsszegMegvaltozik()
+		{
+			Utal_Setup();
+			Assert.True(b.Utal("1234", "5678", 10000));
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(40000));
+			Assert.That(b.Egyenleg("5678"), Is.EqualTo(30000));
+		}
+
+		[Test]
+		public void Utal_SikertelenUtalasEgyenlegNemValtozik()
+		{
+			Utal_Setup();
+			Assert.False(b.Utal("1234", "5678", 50001));
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(50000));
+			Assert.That(b.Egyenleg("5678"), Is.EqualTo(20000));
+		}
+
+		[Test]
+		public void Utal_VanETobb()
+		{
+			Utal_Setup();
+			Assert.That(b.Egyenleg("1234"), Is.GreaterThan(20000));
+			Assert.True(b.Utal("1234", "5678", 20000));
+			Assert.That(b.Egyenleg("1234"), Is.EqualTo(30000));
+			Assert.That(b.Egyenleg("5678"), Is.EqualTo(40000));
+
+		}
+
+		[Test]
+		public void Utal_VanEUgyanannyi()
+		{
+			Utal_Setup();
+			Assert.True(b.Utal("1234", "5678", 50000));
+			Assert.That(b.Egyenleg("1234"), Is.Zero);
+		}
+
+		[Test]
+		public void Utal_UgyanolyanSzamlszamok()
+		{
+			Utal_Setup();
+			Assert.Throws<ArgumentException>(() => b.Utal("1234", "1234", 10000));
+		}
 	}
 }

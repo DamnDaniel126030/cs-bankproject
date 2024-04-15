@@ -111,8 +111,27 @@ namespace BankProject
         /// <exception cref="HibasSzamlaszamException">A megadott számlaszámmal nem létezik számla</exception>
         public bool Utal(string honnan, string hova, ulong osszeg)
         {
-            throw new NotImplementedException();
-        }
+            Szamla szamla1 = SzamlaKereses(honnan);
+            Szamla szamla2 = SzamlaKereses(hova);
+			if (osszeg <= 0)
+			{
+				throw new ArgumentException("Az összeg csak pozitív lehet.", nameof(osszeg));
+			}
+            if (szamla1.Szamlaszam == szamla2.Szamlaszam)
+            {
+                throw new ArgumentException("A két számlaszám nem lehet ugyanaz.", nameof(hova));
+			}
+			if (szamla1.Egyenleg >= osszeg)
+			{
+				szamla1.Egyenleg -= osszeg;
+				szamla2.Egyenleg += osszeg;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 
         private Szamla SzamlaKereses(string szamlaszam)
         {
